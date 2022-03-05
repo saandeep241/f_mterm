@@ -128,7 +128,7 @@ bool desStateServiceCallBack(des_pub_state_service::ServiceMsgRequest &request,
 
     // BRAKE - HALT!!!!!!!!
     case HALT:
-        ROS_INFO("BRAKEEEEEEEEE");
+        ROS_INFO("halt");
         trajBuilder.build_braking_traj(g_start_pose, current_state.twist.twist, vec_of_states);
         for (auto state : vec_of_states)
         {

@@ -18,9 +18,8 @@ geometry_msgs::PoseStamped g_start_pose;
 geometry_msgs::PoseStamped g_end_pose;
 
 bool lidar_alarm = false;
-int s = -1; // this is unreal. state start with 1 for forward.
-//ros::Publisher des_state_pub;
-//ros::ServiceServer des_state_service;
+int s = -1; 
+
 
 const int STOP = 0;
 const int FORWARD = 1;
@@ -49,11 +48,7 @@ bool desStateServiceCallBack(des_pub_state_service::ServiceMsgRequest &request,
 {
     bool success = false;
 
-    // convert mode from string to int:
-    // 0 - init (maybe don't need this?)
-    // 1 - foward
-    // 2 - spin-in-place
-    // 3 - halt
+
     int mode = stoi(request.mode);
     s = mode;
 
@@ -65,9 +60,9 @@ bool desStateServiceCallBack(des_pub_state_service::ServiceMsgRequest &request,
     TrajBuilder trajBuilder;
     trajBuilder.set_dt(dt);
     trajBuilder.set_alpha_max(0.2);
-    trajBuilder.set_accel_max(0.2);
+    trajBuilder.set_accel_max(0.15);
     trajBuilder.set_omega_max(1);
-    trajBuilder.set_speed_max(1);
+    trajBuilder.set_speed_max(0.8);
 
     // calculate the desired state stream using traj_builder lib.
     nav_msgs::Odometry des_state;
@@ -75,11 +70,7 @@ bool desStateServiceCallBack(des_pub_state_service::ServiceMsgRequest &request,
 
     std::vector<nav_msgs::Odometry> vec_of_states;
 
-    ROS_WARN("RECEIVED START_X =  %f", g_start_pose.pose.position.x);
-    ROS_WARN("RECEIVED START_Y =  %f", g_start_pose.pose.position.y);
-    ROS_WARN("RECEIVED GOAL_X =  %f", g_end_pose.pose.position.x);
-    ROS_WARN("RECEIVED GOAL_Y =  %f", g_end_pose.pose.position.y);
-
+   
     switch (s)
     {
     case STOP:
@@ -91,7 +82,7 @@ bool desStateServiceCallBack(des_pub_state_service::ServiceMsgRequest &request,
         ros::spinOnce();
         break;
 
-    // GOING FORWARD
+    // FORWARD
     case FORWARD:
         ROS_INFO("GOING FORWARD");
         trajBuilder.build_travel_traj(g_start_pose, g_end_pose, vec_of_states);
@@ -105,8 +96,8 @@ bool desStateServiceCallBack(des_pub_state_service::ServiceMsgRequest &request,
             ros::spinOnce();
             if (lidar_alarm)
             {
-                ROS_INFO("cannot move, obstalce");
-                return response.success = false;;        // try this
+                ROS_INFO("OBSTACLE");
+                return response.success = false;;        
             }
         }
         return response.success = true;
@@ -126,9 +117,9 @@ bool desStateServiceCallBack(des_pub_state_service::ServiceMsgRequest &request,
         }
         return response.success = true;
 
-    // BRAKE - HALT!!!!!!!!
+    // HALT
     case HALT:
-        ROS_INFO("halt");
+        ROS_INFO("HALT");
         trajBuilder.build_braking_traj(g_start_pose, current_state.twist.twist, vec_of_states);
         for (auto state : vec_of_states)
         {
@@ -142,7 +133,7 @@ bool desStateServiceCallBack(des_pub_state_service::ServiceMsgRequest &request,
         return response.success = true;
         
     case BACKUP:
-        ROS_INFO("Backing up");
+        ROS_INFO("BACKING UP");
         trajBuilder.build_backup_traj(g_start_pose, vec_of_states);
         for (auto state : vec_of_states)
         {
@@ -155,11 +146,6 @@ bool desStateServiceCallBack(des_pub_state_service::ServiceMsgRequest &request,
         }
         return response.success = true;
         
-    //* illegal input. for testing only
-    default:
-        ROS_ERROR("Please type valid mode number");
-        return response.success = false;
-        // just in case. don't know if need this.
     }
 
     return response.success;

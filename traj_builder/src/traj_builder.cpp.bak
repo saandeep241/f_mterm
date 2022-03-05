@@ -324,13 +324,13 @@ void TrajBuilder::build_backup_traj(geometry_msgs::PoseStamped start_pose,
     nav_msgs::Odometry des_state;
 
 
-    des_state.header = start_pose.header; 
-    des_state.pose.pose = start_pose.pose; //starting pose
-    des_state.twist.twist = halt_twist_;  //insist on starting from rest
+    des_state.header = start_pose.header; //really, want to copy the frame_id
+    des_state.pose.pose = start_pose.pose; //start from here
+    des_state.twist.twist = halt_twist_; // insist on starting from rest
 
 
-    double trip_len = 0.5; 
-    double t_ramp = sqrt(trip_len / accel_max_);   
+    double trip_len = 0.5; // backing up 25 cm, keep this less than 1
+    double t_ramp = sqrt(trip_len / accel_max_);    // ~0.71 sec for 0.25m
     int npts_ramp = round(t_ramp / dt_);
 
     double v_peak = -accel_max_*t_ramp; // could consider special cases for reverse motion
