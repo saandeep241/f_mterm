@@ -30,7 +30,7 @@ void stop(){
     {
         ROS_INFO("STOP");
     }
-    ROS_INFO("STOP2");
+    ROS_INFO("STOP");
 }
 
 bool move2coord(float goal_pose_x, float goal_pose_y)

@@ -30,8 +30,25 @@ void stop(){
     {
         ROS_INFO("STOP");
     }
-    ROS_INFO("STOP");
+   
 }
+
+bool rotate(float goal_pose_x,float goal_pose_y)
+{
+	bool success = true;
+    TrajBuilder trajBuilder;
+    des_pub_state_service::ServiceMsg srv;
+    geometry_msgs::PoseStamped start_pose;
+    geometry_msgs::PoseStamped goal_pose_trans;
+    geometry_msgs::PoseStamped goal_pose_rot;
+    string mode;
+    start_pose.pose = current_state.pose.pose;
+    bool success_rotate;
+	
+	
+	
+}
+
 
 bool move2coord(float goal_pose_x, float goal_pose_y)
 {
@@ -44,7 +61,6 @@ bool move2coord(float goal_pose_x, float goal_pose_y)
     string mode;
     start_pose.pose = current_state.pose.pose;
 
-    bool success_rotate;
     bool success_translate;
 
     // For now: rotate to head forward to goal point, then move toward the place.
@@ -57,7 +73,7 @@ bool move2coord(float goal_pose_x, float goal_pose_y)
 
     double des_psi = atan2(dy, dx);
 
-    ROS_INFO("Start_x = = %f", x_start);
+ /*   ROS_INFO("Start_x = = %f", x_start);
     ROS_INFO("Start_y = = %f", y_start);
     ROS_INFO("Goal_x = %f", x_end);
     ROS_INFO("Goal_y = %f", y_end);
@@ -73,14 +89,14 @@ bool move2coord(float goal_pose_x, float goal_pose_y)
         success_rotate = srv.response.success;
         ROS_INFO("rotate success? %d", success_rotate);
     }
-    ros::spinOnce();
+    ros::spinOnce();*/
 
     // forward
-    goal_pose_trans = trajBuilder.xyPsi2PoseStamped(goal_pose_x,
+    goal_pose = trajBuilder.xyPsi2PoseStamped(goal_pose_x,
                                                     goal_pose_y,
                                                     des_psi); // keep des_psi, change x,y
-    srv.request.start_pos = goal_pose_rot;
-    srv.request.goal_pos = goal_pose_trans;
+    srv.request.start_pos = current_pose;
+    srv.request.goal_pos = goal_pose;
     srv.request.mode = "1"; // spin so that head toward the goal.
     if (client.call(srv))
     {
