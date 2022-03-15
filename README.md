@@ -1,8 +1,8 @@
 # final_midterm_project
 
 
-Reference Code
-Code from Dr.Newman's Repo was used as refernce
+Reference:
+Code from Dr.Newman's Repo was used as reference
 NOETIC CODE
 https://github.com/wsnewman/learning_ros_noetic.git
 MELODIC CODE
