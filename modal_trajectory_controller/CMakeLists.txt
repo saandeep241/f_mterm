@@ -34,7 +34,7 @@ include_directories(
 # may add more of these lines for more nodes from the same package
 cs_add_executable(modal_trajectory_controller src/modal_trajectory_controller.cpp)
 cs_add_executable(lin_steering_wrt_odom src/lin_steering_wrt_odom.cpp)
-cs_add_executable(lin_steering_wrt_amcl_and_odom src/lin_steering_wrt_amcl_and_odom.cpp)
+
 
 cs_install()
 cs_export()
