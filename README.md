@@ -13,7 +13,9 @@ roslaunch mobot_urdf mobot_in_pen.launch
 
 Running the nodes:
 --
+
 rosrun current_state_publisher current_state_publisher
+
 --
 rosrun lidar_alarm lidar_alarm
 --
