@@ -232,7 +232,7 @@ int main(int argc, char **argv)
 	ROS_INFO("sending the robot to center");
     init_mobot(2.00,0.15,0,false);
 	ROS_INFO("After step 1");
-    init_mobot(1.5,0.05,0,false);
+    init_mobot(1.5,0.05,0);
 	ROS_INFO("After step 2");
     init_mobot(x2, y2, 0);
 	ROS_INFO("After step 3");

@@ -114,7 +114,7 @@ bool translate(float goal_pose_x, float goal_pose_y,bool rot=true)
     double dx = x_end - x_start;
     double dy = y_end - y_start;
     double des_psi = atan2(dy, dx);
-	if(bool){
+	if(rot){
 	    rotate(des_psi);
 	}
 	
