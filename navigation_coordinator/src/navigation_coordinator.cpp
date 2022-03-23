@@ -91,7 +91,7 @@ bool rotate(float psi)
 
 
 
-bool translate(float goal_pose_x, float goal_pose_y)
+bool translate(float goal_pose_x, float goal_pose_y,bool rot=true)
 {	
 
     bool success = true;
@@ -114,8 +114,10 @@ bool translate(float goal_pose_x, float goal_pose_y)
     double dx = x_end - x_start;
     double dy = y_end - y_start;
     double des_psi = atan2(dy, dx);
-    rotate(des_psi);
-
+	if(bool){
+	    rotate(des_psi);
+	}
+	
 
 
     // forward
@@ -147,14 +149,14 @@ bool translate(float goal_pose_x, float goal_pose_y)
     return success;
 }
 
-void init_mobot(float goal_pose_x, float goal_pose_y, int retry_max)
+void init_mobot(float goal_pose_x, float goal_pose_y, int retry_max,bool rot=true)
 {
     int retry_ctr = 0;
-    bool success = translate(goal_pose_x, goal_pose_y);
+    bool success = translate(goal_pose_x, goal_pose_y,rot);
     while (!success && retry_ctr < retry_max) {
         ROS_WARN("RETRY %d", retry_ctr);
         retry_ctr++;
-        success = translate(goal_pose_x,goal_pose_y);
+        success = translate(goal_pose_x,goal_pose_y,rot);
     }
 }
 
@@ -213,7 +215,7 @@ int main(int argc, char **argv)
   ROS_INFO("Rotating for AMCL");
   rotate(0.3);
   ROS_INFO("Roating for AMCL");
-  rotate(0.3);
+  rotate(-0.3);
     ROS_INFO("Moving to target 1");
     init_mobot(x1, y1, 0);
     
@@ -227,7 +229,8 @@ int main(int argc, char **argv)
     
     ROS_INFO("Current state x=[%f],y=[%f]",current_state.pose.pose.position.x,current_state.pose.pose.position.y);
     ROS_INFO("Coming back from target 1");
-    init_mobot(2.00,0.15,0);
+	ROS_INFO("sending the robot to center");
+    init_mobot(2.00,0.15,0,false);
 	ROS_INFO("After step 1");
     init_mobot(1.5,0.05,0);
 	ROS_INFO("After step 2");
