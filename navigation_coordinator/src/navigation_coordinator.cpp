@@ -45,15 +45,17 @@ float check_angle(float initial_angle,float desired_change)
 {   
     double actual_angle = current_state.pose.pose.orientation.z;
     double diff = min_angle(initial_angle+desired_change-actual_angle);
+	ROS_INFO("angles  initial=[%f],desired=[%f],correction=[%f]",initial_angle,desired_change,diff);
     if (diff>0)
         {
+		
         return diff;
         }
     else
         {
         return -diff;
         }
-	ROS_INFO("angles  initial=[%f],desired=[%f],correction=[%f]",initial_angle,desired_change,diff);
+	
 }
 
 
@@ -238,10 +240,10 @@ int main(int argc, char **argv)
     init_mobot(x2, y2, 0,false);
 	ROS_INFO("After step 3");
     prev_angle = current_state.pose.pose.orientation.z;
-    rotate(-M_PI/6);
-    rotate(-M_PI/6);
-    rotate(-M_PI/6);
-    correction = check_angle(prev_angle,-M_PI/2);
+    rotate(M_PI/6);
+    rotate(M_PI/6);
+    rotate(M_PI/6);
+    correction = check_angle(prev_angle,M_PI/2);
     ROS_INFO("Moving to target 2");
     init_mobot(x3, y3, 0,false);
     
