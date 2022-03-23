@@ -53,6 +53,7 @@ float check_angle(float initial_angle,float desired_change)
         {
         return -diff;
         }
+	ROS_INFO("angles  initial=[%f],desired=[%f],correction=[%f]",initial_angle,desired_change,diff);
 }
 
 

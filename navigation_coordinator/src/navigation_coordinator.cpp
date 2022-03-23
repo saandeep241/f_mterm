@@ -248,7 +248,7 @@ int main(int argc, char **argv)
     backUp();
 
     ROS_INFO("Going home");
-    init_mobot(x1, y1, 0);
+    init_mobot(x1, y1, 0,true);
 
     //float x_l = current_pose.pose.position.x;
     //float y_l = current_pose.pose.position.y;
