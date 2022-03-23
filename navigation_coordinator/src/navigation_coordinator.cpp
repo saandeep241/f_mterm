@@ -53,6 +53,7 @@ float check_angle(float initial_angle,float desired_change)
         {
         return -diff;
         }
+	ROS_INFO("angles  initial=[%f],desired=[%f],correction=[%f]",initial_angle,desired_change,diff);
 }
 
 
@@ -91,7 +92,7 @@ bool rotate(float psi)
 
 
 
-bool translate(float goal_pose_x, float goal_pose_y,bool rot=true)
+bool translate(float goal_pose_x, float goal_pose_y,bool rot)
 {	
 
     bool success = true;
@@ -114,7 +115,7 @@ bool translate(float goal_pose_x, float goal_pose_y,bool rot=true)
     double dx = x_end - x_start;
     double dy = y_end - y_start;
     double des_psi = atan2(dy, dx);
-	if(rot){
+	if(rot==true){
 	    rotate(des_psi);
 	}
 	
@@ -149,7 +150,7 @@ bool translate(float goal_pose_x, float goal_pose_y,bool rot=true)
     return success;
 }
 
-void init_mobot(float goal_pose_x, float goal_pose_y, int retry_max,bool rot=true)
+void init_mobot(float goal_pose_x, float goal_pose_y, int retry_max,bool rot)
 {
     int retry_ctr = 0;
     bool success = translate(goal_pose_x, goal_pose_y,rot);
@@ -209,15 +210,15 @@ int main(int argc, char **argv)
     //float y_o = current_pose.pose.position.y;
 
    ROS_INFO("Rotating for AMCL");
-    rotate(0.3);
+    //rotate(0.3);
    ROS_INFO("Rotating for AMCL");
-    rotate(-0.3);
+    //rotate(-0.3);
   ROS_INFO("Rotating for AMCL");
-  rotate(0.3);
+  //rotate(0.3);
   ROS_INFO("Roating for AMCL");
-  rotate(-0.3);
+  //rotate(-0.3);
     ROS_INFO("Moving to target 1");
-    init_mobot(x1, y1, 0);
+    init_mobot(x1, y1, 0,true);
     
     double prev_angle = current_state.pose.pose.orientation.z;
     backUp();
@@ -232,9 +233,9 @@ int main(int argc, char **argv)
 	ROS_INFO("sending the robot to center");
     init_mobot(2.00,0.15,0,false);
 	ROS_INFO("After step 1");
-    init_mobot(1.5,0.05,0);
+    init_mobot(1.5,0.05,0,false);
 	ROS_INFO("After step 2");
-    init_mobot(x2, y2, 0);
+    init_mobot(x2, y2, 0,false);
 	ROS_INFO("After step 3");
     prev_angle = current_state.pose.pose.orientation.z;
     rotate(-M_PI/6);
@@ -242,7 +243,7 @@ int main(int argc, char **argv)
     rotate(-M_PI/6);
     correction = check_angle(prev_angle,-M_PI/2);
     ROS_INFO("Moving to target 2");
-    init_mobot(x3, y3, 0);
+    init_mobot(x3, y3, 0,false);
     
     backUp();
 
