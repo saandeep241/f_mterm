@@ -33,43 +33,35 @@ void stop(){
   
 }
 
-bool rotate(float goal_pose_x, float goal_pose_y)
+
+
+bool rotate(float psi)
 
 {
-	bool success = true;
+    //this method just rotates the robot , this is useful for rotating to the respective direction and also amcl
+    bool success = true;
     TrajBuilder trajBuilder;
     des_pub_state_service::ServiceMsg srv;
     geometry_msgs::PoseStamped start_pose;
-    geometry_msgs::PoseStamped goal_pose_trans;
     geometry_msgs::PoseStamped goal_pose_rot;
     string mode;
     start_pose.pose = current_state.pose.pose;
 
-    //bool success_rotate;
-    bool success_translate;
-
-    // For now: rotate to head forward to goal point, then move toward the place.
-    double x_start = start_pose.pose.position.x;
-    double y_start = start_pose.pose.position.y;
-    double x_end = goal_pose_x;
-    double y_end = goal_pose_y;
-    double dx = x_end - x_start;
-    double dy = y_end - y_start;
-
-    double des_psi = atan2(dy, dx);
+    bool success_rotate;
+  
 
   
     // rotate
     goal_pose_rot = trajBuilder.xyPsi2PoseStamped(current_pose.pose.position.x,
                                                   current_pose.pose.position.y,
-                                                  des_psi); // keep the same x,y, only rotate to des_psi
+                                                  psi); 
     srv.request.start_pos = current_pose;
     srv.request.goal_pos = goal_pose_rot;
-    srv.request.mode = "2"; // spin so that head toward the goal.
+    srv.request.mode = "2"; 
     if (client.call(srv))
     {
         success_rotate = srv.response.success;
-        ROS_INFO("rotate success? %d", success_rotate);
+        ROS_INFO("rotate success %d", success_rotate);
     }
     ros::spinOnce();
 	return success;
@@ -78,9 +70,9 @@ bool rotate(float goal_pose_x, float goal_pose_y)
 
 
 
-bool move2coord(float goal_pose_x, float goal_pose_y)
+bool translate(float goal_pose_x, float goal_pose_y)
 {	
-	rotate(float goal_pose_x, float goal_pose_y);
+
     bool success = true;
     TrajBuilder trajBuilder;
     des_pub_state_service::ServiceMsg srv;
@@ -90,36 +82,20 @@ bool move2coord(float goal_pose_x, float goal_pose_y)
     string mode;
     start_pose.pose = current_state.pose.pose;
 
-    //bool success_rotate;
+
     bool success_translate;
 
-    // For now: rotate to head forward to goal point, then move toward the place.
-    /*double x_start = start_pose.pose.position.x;
+
+    double x_start = start_pose.pose.position.x;
     double y_start = start_pose.pose.position.y;
     double x_end = goal_pose_x;
     double y_end = goal_pose_y;
     double dx = x_end - x_start;
     double dy = y_end - y_start;
-
     double des_psi = atan2(dy, dx);
+    rotate(des_psi);
 
-    ROS_INFO("Start_x = = %f", x_start);
-    ROS_INFO("Start_y = = %f", y_start);
-    ROS_INFO("Goal_x = %f", x_end);
-    ROS_INFO("Goal_y = %f", y_end);
-    // rotate
-    goal_pose_rot = trajBuilder.xyPsi2PoseStamped(current_pose.pose.position.x,
-                                                  current_pose.pose.position.y,
-                                                  des_psi); // keep the same x,y, only rotate to des_psi
-    srv.request.start_pos = current_pose;
-    srv.request.goal_pos = goal_pose_rot;
-    srv.request.mode = "2"; // spin so that head toward the goal.
-    if (client.call(srv))
-    {
-        success_rotate = srv.response.success;
-        ROS_INFO("rotate success? %d", success_rotate);
-    }
-    ros::spinOnce();*/
+
 
     // forward
     goal_pose_trans = trajBuilder.xyPsi2PoseStamped(goal_pose_x,
@@ -127,11 +103,11 @@ bool move2coord(float goal_pose_x, float goal_pose_y)
                                                     des_psi); // keep des_psi, change x,y
     srv.request.start_pos = goal_pose_rot;
     srv.request.goal_pos = goal_pose_trans;
-    srv.request.mode = "1"; // spin so that head toward the goal.
+    srv.request.mode = "1"; // 
     if (client.call(srv))
     {
         success_translate = srv.response.success;
-        ROS_INFO("translate success? %d", success_translate);
+        ROS_INFO("translate success%d", success_translate);
     }
     ros::spinOnce();
 
@@ -140,8 +116,8 @@ bool move2coord(float goal_pose_x, float goal_pose_y)
     {
         ROS_INFO("Cannot move, obstacle. braking");
         srv.request.start_pos = current_pose;
-        srv.request.goal_pos = current_pose; //anything is fine.
-        srv.request.mode = "3";              // spin so that head toward the goal.
+        srv.request.goal_pos = current_pose; 
+        srv.request.mode = "3";              
         client.call(srv);
         success = false;
     }
@@ -150,14 +126,14 @@ bool move2coord(float goal_pose_x, float goal_pose_y)
     return success;
 }
 
-void tryMove(float goal_pose_x, float goal_pose_y, int retry_max)
+void init_mobot(float goal_pose_x, float goal_pose_y, int retry_max)
 {
     int retry_ctr = 0;
-    bool success = move2coord(goal_pose_x, goal_pose_y);
+    bool success = translate(goal_pose_x, goal_pose_y);
     while (!success && retry_ctr < retry_max) {
         ROS_WARN("RETRY %d", retry_ctr);
         retry_ctr++;
-        success = move2coord(goal_pose_x,goal_pose_y);
+        success = translate(goal_pose_x,goal_pose_y);
     }
 }
 
@@ -176,7 +152,7 @@ void backUp()
     if (client.call(srv))
     {
         bool success_backup = srv.response.success;
-        ROS_INFO("rotate success? %d", success_backup);
+        ROS_INFO("backup %d", success_backup);
     }
     ros::spinOnce();
 }
@@ -194,45 +170,44 @@ int main(int argc, char **argv)
 
     TrajBuilder trajBuilder;
 
-    float x_4 = 3.115;
-    float y_4 = 0.404;
+    float x1 = 3.115;
+    float y1 = 0.404;
 
-    float x_5 = -2.016;
-    float y_5 = 0.30;
+    float x2 = 0.7;
+    float y2 = 0.0;
 
-    float x_6 = 0;
-    float y_6 = 0.005;
+    float x3 = 0.75;
+    float y3 = 1.905;
 
-    float x_o = current_pose.pose.position.x;
-    float y_o = current_pose.pose.position.y;
+    //float x_o = current_pose.pose.position.x;
+    //float y_o = current_pose.pose.position.y;
 
-    //ROS_INFO("STEP 1");
-    //tryMove(x_1, y_1, 1);
-
-    //ROS_INFO("STEP 2");
-    //tryMove(x_2, y_2, 1);
-
-    //ROS_INFO("STEP 3");
-    //tryMove(x_3, y_3, 1);
-
-    ROS_INFO("STEP 4");
-    tryMove(x_4, y_4, 0);
+   ROS_INFO("Rotating for AMCL");
+    rotate(0.1);
+   ROS_INFO("Rotating for AMCL");
+    rotate(-0.1);
+  ROS_INFO("Rotating for AMCL");
+  rotate(0.2);
+  ROS_INFO("Roating for AMCL");
+  rotate(-0.2);
+    ROS_INFO("Moving to target 1");
+    init_mobot(x1, y1, 0);
     
     backUp();
 
-    ROS_INFO("STEP 5");
-    tryMove(x_5, y_5, 0);
+    ROS_INFO("Coming back from target 1");
+    init_mobot(x2, y2, 0);
 
-    ROS_INFO("STEP 6");
-    tryMove(x_6, y_6, 0);
+    ROS_INFO("Moving to target 2");
+    init_mobot(x3, y3, 0);
     
     backUp();
 
-    ROS_INFO("STEP 7");
-    tryMove(x_1, y_1, 0);
+    ROS_INFO("Going home");
+    init_mobot(x1, y1, 0);
 
-    float x_l = current_pose.pose.position.x;
-    float y_l = current_pose.pose.position.y;
+    //float x_l = current_pose.pose.position.x;
+    //float y_l = current_pose.pose.position.y;
 
     // stop everything
     stop();
