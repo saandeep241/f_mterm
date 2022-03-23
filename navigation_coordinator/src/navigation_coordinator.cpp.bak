@@ -33,6 +33,27 @@ void stop(){
   
 }
 
+double min_angle(double dang) {
+    while (dang > M_PI) dang -= 2.0 * M_PI;
+    while (dang < -M_PI) dang += 2.0 * M_PI;
+    return dang;
+}
+
+
+
+float check_angle(float initial_angle,float desired_change)
+{   
+    double actual_angle = current_state.pose.pose.orientation.z;
+    double diff = min_angle(initial_angle+desired_change-actual_angle);
+    if (diff>0)
+        {
+        return diff;
+        }
+    else
+        {
+        return -diff;
+        }
+}
 
 
 bool rotate(float psi)
@@ -49,7 +70,7 @@ bool rotate(float psi)
 
     bool success_rotate;
   
-
+    ROS_INFO("Rotating at an angle of %f",psi);
   
     // rotate
     goal_pose_rot = trajBuilder.xyPsi2PoseStamped(current_pose.pose.position.x,
@@ -157,6 +178,9 @@ void backUp()
     ros::spinOnce();
 }
 
+
+
+
 int main(int argc, char **argv)
 {
     ros::init(argc, argv, "navigation_coordinator");
@@ -183,21 +207,34 @@ int main(int argc, char **argv)
     //float y_o = current_pose.pose.position.y;
 
    ROS_INFO("Rotating for AMCL");
-    rotate(0.1);
+    rotate(0.3);
    ROS_INFO("Rotating for AMCL");
-    rotate(-0.1);
+    rotate(-0.3);
   ROS_INFO("Rotating for AMCL");
-  rotate(0.2);
+  rotate(0.4);
   ROS_INFO("Roating for AMCL");
-  rotate(-0.2);
+  rotate(-0.3);
     ROS_INFO("Moving to target 1");
     init_mobot(x1, y1, 0);
     
+    double prev_angle = current_state.pose.pose.orientation.z;
     backUp();
-
+    rotate(0.5);
+    rotate(0.5);
+    rotate(0.5);
+    double correction = check_angle(prev_angle,1.5);
+    rotate(correction);
+    
+    ROS_INFO("Current state x=[%f],y=[%f]",current_state.pose.pose.position.x,current_state.pose.pose.position.y);
     ROS_INFO("Coming back from target 1");
+    init_mobot(2.00,0.15,0);
+    init_mobot(1.5,0.05,0);
     init_mobot(x2, y2, 0);
-
+    prev_angle = current_state.pose.pose.orientation.z;
+    rotate(0.5);
+    rotate(0.57);
+    rotate(0.5);
+    correction = check_angle(prev_angle,1.57);
     ROS_INFO("Moving to target 2");
     init_mobot(x3, y3, 0);
     

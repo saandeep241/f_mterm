@@ -211,30 +211,33 @@ int main(int argc, char **argv)
    ROS_INFO("Rotating for AMCL");
     rotate(-0.3);
   ROS_INFO("Rotating for AMCL");
-  rotate(0.4);
+  rotate(0.3);
   ROS_INFO("Roating for AMCL");
-  rotate(-0.3);
+  rotate(0.3);
     ROS_INFO("Moving to target 1");
     init_mobot(x1, y1, 0);
     
     double prev_angle = current_state.pose.pose.orientation.z;
     backUp();
-    rotate(0.5);
-    rotate(0.5);
-    rotate(0.5);
-    double correction = check_angle(prev_angle,1.5);
+    rotate(M_PI/3);
+    rotate(M_PI/3);
+    rotate(M_PI/3);
+    double correction = check_angle(prev_angle,M_PI);
     rotate(correction);
     
     ROS_INFO("Current state x=[%f],y=[%f]",current_state.pose.pose.position.x,current_state.pose.pose.position.y);
     ROS_INFO("Coming back from target 1");
     init_mobot(2.00,0.15,0);
+	ROS_INFO("After step 1");
     init_mobot(1.5,0.05,0);
+	ROS_INFO("After step 2");
     init_mobot(x2, y2, 0);
+	ROS_INFO("After step 3");
     prev_angle = current_state.pose.pose.orientation.z;
-    rotate(0.5);
-    rotate(0.57);
-    rotate(0.5);
-    correction = check_angle(prev_angle,1.57);
+    rotate(-M_PI/6);
+    rotate(-M_PI/6);
+    rotate(-M_PI/6);
+    correction = check_angle(prev_angle,-M_PI/2);
     ROS_INFO("Moving to target 2");
     init_mobot(x3, y3, 0);
     
