@@ -7,6 +7,8 @@
 #include <geometry_msgs/Quaternion.h>
 #include <des_pub_state_service/ServiceMsg.h>
 #include <traj_builder/traj_builder.h>
+#include <math.h>
+
 
 using namespace std;
 
@@ -44,8 +46,10 @@ double min_angle(double dang) {
 float check_angle(float initial_angle,float desired_change)
 {   
     double actual_angle = current_state.pose.pose.orientation.z;
+    initial_angle = asin(initial_angle)*2; //0
+    actual_angle = asin(actual_angle)*2;  //160
     double diff = min_angle(initial_angle+desired_change-actual_angle);
-	ROS_INFO("angles  initial=[%f],desired=[%f],correction=[%f]",initial_angle,desired_change,diff);
+	ROS_INFO("angles  initial=[%f],current=[%f],desired=[%f],correction=[%f]",initial_angle,actual_angle,desired_change,diff);
     if (diff>0)
         {
 		
@@ -91,8 +95,6 @@ bool rotate(float psi)
 	return success;
 	
 }
-
-
 
 bool translate(float goal_pose_x, float goal_pose_y,bool rot)
 {	
@@ -218,17 +220,38 @@ int main(int argc, char **argv)
   ROS_INFO("Rotating for AMCL");
   //rotate(0.3);
   ROS_INFO("Roating for AMCL");
-  //rotate(-0.3);
-    ROS_INFO("Moving to target 1");
-    init_mobot(x1, y1, 0,true);
-    
+  //rotate(-0.3);M_PI-asin(prev_angle)*2
+       
+    //backUp();
     double prev_angle = current_state.pose.pose.orientation.z;
-    backUp();
-    rotate(M_PI/3);
-    rotate(M_PI/3);
-    rotate(M_PI/3);
-    double correction = check_angle(prev_angle,M_PI);
+    double des_angle = M_PI-asin(prev_angle)*2;
+    ros::spinOnce();
+    rotate(des_angle/2);
+    double correction = check_angle(prev_angle,des_angle/2);
+    ros::Duration(0.5).sleep();
+    ros::spinOnce();
     rotate(correction);
+    prev_angle = current_state.pose.pose.orientation.z;
+    ros::Duration(0.5).sleep();
+   ros::spinOnce();
+    rotate(des_angle/2);
+    correction = check_angle(prev_angle,des_angle);
+    ros::spinOnce();
+    rotate(correction);
+    //ros::Duration(0.5).sleep();
+  // ros::Duration(0.5).sleep();
+     /*rotate(M_PI/3);
+    //rotate(0);
+    ros::Duration(0.5).sleep();
+    rotate(M_PI/3);
+    //rotate(0);
+    ros::Duration(0.5).sleep();*/
+    
+    //ros::Duration(0.5).sleep();
+    //ros::Duration(0.5).sleep();
+    //rotate(correction);
+    
+
     
     ROS_INFO("Current state x=[%f],y=[%f]",current_state.pose.pose.position.x,current_state.pose.pose.position.y);
     ROS_INFO("Coming back from target 1");
