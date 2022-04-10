@@ -89,29 +89,17 @@ bool rotate(float psi)
     if (client.call(srv))
     {
         success_rotate = srv.response.success;
-        ROS_INFO("rotate success %d", success_rotate);
+        ROS_INFO("rotate success%d", success_rotate);
     }
     ros::spinOnce();
-	return success;
+	return success_rotate;
 	
 }
 
-bool translate(float goal_pose_x, float goal_pose_y,bool rot)
-{	
-
-    bool success = true;
-    TrajBuilder trajBuilder;
-    des_pub_state_service::ServiceMsg srv;
+float calculate_angle_correction(float goal_pose_x, float goal_pose_y)
+{
     geometry_msgs::PoseStamped start_pose;
-    geometry_msgs::PoseStamped goal_pose_trans;
-    geometry_msgs::PoseStamped goal_pose_rot;
-    string mode;
     start_pose.pose = current_state.pose.pose;
-
-
-    bool success_translate;
-
-
     double x_start = start_pose.pose.position.x;
     double y_start = start_pose.pose.position.y;
     double x_end = goal_pose_x;
@@ -119,9 +107,38 @@ bool translate(float goal_pose_x, float goal_pose_y,bool rot)
     double dx = x_end - x_start;
     double dy = y_end - y_start;
     double des_psi = atan2(dy, dx);
-	if(rot==true){
-	    rotate(des_psi);
-	}
+    return des_psi;
+
+
+}
+
+bool translate(float goal_pose_x, float goal_pose_y,float des_psi, bool rot)
+{	
+
+    bool success = true;
+    TrajBuilder trajBuilder;
+    des_pub_state_service::ServiceMsg srv;
+    geometry_msgs::PoseStamped start_pose;
+    geometry_msgs::PoseStamped goal_pose_trans;
+   // geometry_msgs::PoseStamped goal_pose_rot;
+    string mode;
+    start_pose.pose = current_state.pose.pose;
+
+
+    bool success_translate;
+    if (rot==true){
+        rotate(des_psi);
+    }
+
+
+    /*double x_start = start_pose.pose.position.x;
+    double y_start = start_pose.pose.position.y;
+    double x_end = goal_pose_x;
+    double y_end = goal_pose_y;
+    double dx = x_end - x_start;
+    double dy = y_end - y_start;
+    double des_psi = atan2(dy, dx);*/
+
 	
 
 
@@ -129,7 +146,7 @@ bool translate(float goal_pose_x, float goal_pose_y,bool rot)
     goal_pose_trans = trajBuilder.xyPsi2PoseStamped(goal_pose_x,
                                                     goal_pose_y,
                                                     des_psi); // keep des_psi, change x,y
-    srv.request.start_pos = goal_pose_rot;
+    srv.request.start_pos = current_pose;
     srv.request.goal_pos = goal_pose_trans;
     srv.request.mode = "1"; // 
     if (client.call(srv))
@@ -154,14 +171,12 @@ bool translate(float goal_pose_x, float goal_pose_y,bool rot)
     return success;
 }
 
-void init_mobot(float goal_pose_x, float goal_pose_y, int retry_max,bool rot)
+void init_mobot(float goal_pose_x, float goal_pose_y, float des_psi,bool rot)
 {
     int retry_ctr = 0;
-    bool success = translate(goal_pose_x, goal_pose_y,rot);
-    while (!success && retry_ctr < retry_max) {
-        ROS_WARN("RETRY %d", retry_ctr);
-        retry_ctr++;
-        success = translate(goal_pose_x,goal_pose_y,rot);
+    bool success = translate(goal_pose_x, goal_pose_y,des_psi,rot);
+    while (!success) {
+        success = translate(goal_pose_x,goal_pose_y,des_psi,rot);
     }
 }
 
@@ -201,29 +216,38 @@ int main(int argc, char **argv)
 
     TrajBuilder trajBuilder;
 
-    float x1 = 3.115;
+    float x_table1 = 3.115;
+    float y_table1 = 0.550;
+
+    float x_table2 = 0.430;
+    float y_table2 =2.500;
+
+    float x_home = 0.0;
+    float y_home = 0.0;
+    float head_home=0.0;
+
+
+    /*float x1 = 3.115;
     float y1 = 0.404;
 
     float x2 = 0.7;
     float y2 = 0.0;
 
     float x3 = 0.75;
-    float y3 = 1.905;
+    float y3 = 1.905;*/
 
-    //float x_o = current_pose.pose.position.x;
-    //float y_o = current_pose.pose.position.y;
 
-   ROS_INFO("Rotating for AMCL");
+   //ROS_INFO("Rotating for AMCL");
     //rotate(0.3);
-   ROS_INFO("Rotating for AMCL");
+   //ROS_INFO("Rotating for AMCL");
     //rotate(-0.3);
-  ROS_INFO("Rotating for AMCL");
+  //ROS_INFO("Rotating for AMCL");
   //rotate(0.3);
-  ROS_INFO("Roating for AMCL");
+  //ROS_INFO("Roating for AMCL");
   //rotate(-0.3);M_PI-asin(prev_angle)*2
        
     //backUp();
-    double prev_angle = current_state.pose.pose.orientation.z;
+    /*double prev_angle = current_state.pose.pose.orientation.z;
     double des_angle = M_PI-asin(prev_angle)*2;
     ros::spinOnce();
     rotate(des_angle/2);
@@ -249,11 +273,94 @@ int main(int argc, char **argv)
     
     //ros::Duration(0.5).sleep();
     //ros::Duration(0.5).sleep();
-    //rotate(correction);
+    //rotate(correction);*/
+    float des_psi = calculate_angle_correction(x_table1/4,y_table1);
+    ROS_INFO("Current state x=[%f],y=[%f]",current_state.pose.pose.position.x,current_state.pose.pose.position.y);
+    ROS_INFO("Current state heading=[%f]",current_state.pose.pose.orientation.z);
+    ROS_INFO("Starting from home 1");
+    init_mobot(x_table1/4,y_table1,des_psi,true);
+       
+    ROS_INFO("After step 1");
+    ROS_INFO("Current state x=[%f],y=[%f]",current_state.pose.pose.position.x,current_state.pose.pose.position.y);
+    ROS_INFO("Current state heading=[%f]",current_state.pose.pose.orientation.z);
+
+    ROS_INFO("Starting from home 2");
+    /* float cur_heading = asin(current_state.pose.pose.orientation.z)*2;
+    if (cur_heading==des_psi){
+        init_mobot(x_table1/2,y_table1,0,true);
+        }
+    else
+    {
+        init_mobot(x_table1/2,y_table1,des_psi-cur_heading,true);
+    }*/
+    des_psi = calculate_angle_correction(x_table1/2,y_table1);
+    init_mobot(x_table1/2,y_table1,des_psi,true);
+    ROS_INFO("After step 2");
+    ROS_INFO("Current state x=[%f],y=[%f]",current_state.pose.pose.position.x,current_state.pose.pose.position.y);
+    ROS_INFO("Current state heading=[%f]",current_state.pose.pose.orientation.z);
+
+    ROS_INFO("Starting from home 3");
+    des_psi = calculate_angle_correction(3*x_table1/4,y_table1);
+    init_mobot(3*x_table1/4,y_table1,des_psi,true);
+    ROS_INFO("After step 3");
+    ROS_INFO("Current state x=[%f],y=[%f]",current_state.pose.pose.position.x,current_state.pose.pose.position.y);
+    ROS_INFO("Current state heading=[%f]",current_state.pose.pose.orientation.z);
+
+    ROS_INFO("Starting from home 4");
+    des_psi = calculate_angle_correction(x_table1,y_table1);
+    init_mobot(x_table1,y_table1,des_psi,true);
+    ROS_INFO("After step 4");
+    ROS_INFO("Current state x=[%f],y=[%f]",current_state.pose.pose.position.x,current_state.pose.pose.position.y);
+    ROS_INFO("Current state heading=[%f]",current_state.pose.pose.orientation.z);
+    ROS_INFO("Should have reached table 1");
+    backUp();
+    ROS_INFO("After backup1");
+    ROS_INFO("Current state x=[%f],y=[%f]",current_state.pose.pose.position.x,current_state.pose.pose.position.y);
+    ROS_INFO("Current state heading=[%f]",current_state.pose.pose.orientation.z);
+    ROS_INFO("The above is after backup");
+
+    des_psi = calculate_angle_correction(x_table2,y_table2);
+    init_mobot(0.430,0.410,des_psi,true);
+    ROS_INFO("After table 1, step 1");
+    ROS_INFO("Current state x=[%f],y=[%f]",current_state.pose.pose.position.x,current_state.pose.pose.position.y);
+    ROS_INFO("Current state heading=[%f]",current_state.pose.pose.orientation.z);
+
+    
+    init_mobot(0.430,1.410,0,true);
+
+    ROS_INFO("After table 1, step 2");
+    ROS_INFO("Current state x=[%f],y=[%f]",current_state.pose.pose.position.x,current_state.pose.pose.position.y);
+    ROS_INFO("Current state heading=[%f]",current_state.pose.pose.orientation.z);
+
+    init_mobot(0.430,2.500,0,true);
+    ROS_INFO("After table 1, step 3");
+    ROS_INFO("Current state x=[%f],y=[%f]",current_state.pose.pose.position.x,current_state.pose.pose.position.y);
+    ROS_INFO("Current state heading=[%f]",current_state.pose.pose.orientation.z);
+    ROS_INFO("Should have reached table2");
+   // init_mobot(x_table2,y_table2,des_psi,true);
+    backUp();
+    ROS_INFO("Backup after tavle 2");
+    ROS_INFO("Current state x=[%f],y=[%f]",current_state.pose.pose.position.x,current_state.pose.pose.position.y);
+    ROS_INFO("Current state heading=[%f]",current_state.pose.pose.orientation.z);
+
+   des_psi = calculate_angle_correction(x_home,y_home);
+   ROS_INFO("Going home now");
+   init_mobot(x_home,y_home,des_psi,true);
+   rotate(head_home);
+   ROS_INFO("Should have reached home");
+
+    /*init_mobot(0,0,des_psi,true);
+    ROS_INFO("Current state x=[%f],y=[%f]",current_state.pose.pose.position.x,current_state.pose.pose.position.y);
+    ROS_INFO("Current state heading=[%f]",current_state.pose.pose.orientation.z);
+    ROS_INFO("Should have reached table 1");
+    backUp();
+    ROS_INFO("Turning to check to send it to home");*/
+
+
     
 
     
-    ROS_INFO("Current state x=[%f],y=[%f]",current_state.pose.pose.position.x,current_state.pose.pose.position.y);
+    /*ROS_INFO("Current state x=[%f],y=[%f]",current_state.pose.pose.position.x,current_state.pose.pose.position.y);
     ROS_INFO("Coming back from target 1");
 	ROS_INFO("sending the robot to center");
     init_mobot(2.00,0.15,0,false);
@@ -268,12 +375,12 @@ int main(int argc, char **argv)
     rotate(M_PI/6);
     correction = check_angle(prev_angle,M_PI/2);
     ROS_INFO("Moving to target 2");
-    init_mobot(x3, y3, 0,false);
+    init_mobot(x3, y3, 0,false);*/
     
-    backUp();
+    
 
-    ROS_INFO("Going home");
-    init_mobot(x1, y1, 0,true);
+   // ROS_INFO("Going home");
+    //init_mobot(x1, y1, 0,true);
 
     //float x_l = current_pose.pose.position.x;
     //float y_l = current_pose.pose.position.y;
