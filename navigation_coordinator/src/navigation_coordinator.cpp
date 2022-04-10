@@ -216,11 +216,11 @@ int main(int argc, char **argv)
 
     TrajBuilder trajBuilder;
 
-    float x_table1 = 3.115;
-    float y_table1 = 0.550;
+    float x_table1 = 3.815;
+    float y_table1 = 0.460;
 
     float x_table2 = 0.430;
-    float y_table2 =2.500;
+    float y_table2 =2.380;
 
     float x_home = 0.0;
     float y_home = 0.0;
@@ -274,11 +274,11 @@ int main(int argc, char **argv)
     //ros::Duration(0.5).sleep();
     //ros::Duration(0.5).sleep();
     //rotate(correction);*/
-    float des_psi = calculate_angle_correction(x_table1/4,y_table1);
+    float des_psi = calculate_angle_correction(x_table1,y_table1);
     ROS_INFO("Current state x=[%f],y=[%f]",current_state.pose.pose.position.x,current_state.pose.pose.position.y);
     ROS_INFO("Current state heading=[%f]",current_state.pose.pose.orientation.z);
     ROS_INFO("Starting from home 1");
-    init_mobot(x_table1/4,y_table1,des_psi,true);
+    init_mobot(x_table1/3,y_table1,des_psi,true);
        
     ROS_INFO("After step 1");
     ROS_INFO("Current state x=[%f],y=[%f]",current_state.pose.pose.position.x,current_state.pose.pose.position.y);
@@ -293,55 +293,83 @@ int main(int argc, char **argv)
     {
         init_mobot(x_table1/2,y_table1,des_psi-cur_heading,true);
     }*/
-    des_psi = calculate_angle_correction(x_table1/2,y_table1);
-    init_mobot(x_table1/2,y_table1,des_psi,true);
+    des_psi = calculate_angle_correction(2*x_table1/3,y_table1);
+    init_mobot(x_table1/2,y_table1,0,true);
     ROS_INFO("After step 2");
     ROS_INFO("Current state x=[%f],y=[%f]",current_state.pose.pose.position.x,current_state.pose.pose.position.y);
     ROS_INFO("Current state heading=[%f]",current_state.pose.pose.orientation.z);
 
-    ROS_INFO("Starting from home 3");
+    /*ROS_INFO("Starting from home 3");
     des_psi = calculate_angle_correction(3*x_table1/4,y_table1);
     init_mobot(3*x_table1/4,y_table1,des_psi,true);
     ROS_INFO("After step 3");
     ROS_INFO("Current state x=[%f],y=[%f]",current_state.pose.pose.position.x,current_state.pose.pose.position.y);
-    ROS_INFO("Current state heading=[%f]",current_state.pose.pose.orientation.z);
+    ROS_INFO("Current state heading=[%f]",current_state.pose.pose.orientation.z);*/
 
     ROS_INFO("Starting from home 4");
     des_psi = calculate_angle_correction(x_table1,y_table1);
-    init_mobot(x_table1,y_table1,des_psi,true);
+    init_mobot(x_table1,y_table1,0,true);
     ROS_INFO("After step 4");
     ROS_INFO("Current state x=[%f],y=[%f]",current_state.pose.pose.position.x,current_state.pose.pose.position.y);
     ROS_INFO("Current state heading=[%f]",current_state.pose.pose.orientation.z);
     ROS_INFO("Should have reached table 1");
     backUp();
+
     ROS_INFO("After backup1");
     ROS_INFO("Current state x=[%f],y=[%f]",current_state.pose.pose.position.x,current_state.pose.pose.position.y);
     ROS_INFO("Current state heading=[%f]",current_state.pose.pose.orientation.z);
     ROS_INFO("The above is after backup");
 
+
+
+    //des_psi = calculate_angle_correction(x_table2,current_state.pose.pose.position.y);
+    //init_mobot(x_table2,current_state.pose.pose.position.y,des_psi,true);
+
+
+    des_psi = calculate_angle_correction(x_table2,y_table2-1.96);
+    init_mobot(x_table2,y_home,des_psi,true);
+
+
+
+
+    des_psi = calculate_angle_correction(x_table2,y_table2-0.96);
+    init_mobot(x_table2,y_table2,des_psi,true);
+
+
     des_psi = calculate_angle_correction(x_table2,y_table2);
-    init_mobot(0.430,0.410,des_psi,true);
+    init_mobot(x_table2,y_table2,des_psi,true);
+
+
+    
+
+    /*des_psi = calculate_angle_correction(x_table2,y_table2-1);
+    init_mobot(x_table2,y_table2/4,des_psi,true);
     ROS_INFO("After table 1, step 1");
     ROS_INFO("Current state x=[%f],y=[%f]",current_state.pose.pose.position.x,current_state.pose.pose.position.y);
     ROS_INFO("Current state heading=[%f]",current_state.pose.pose.orientation.z);
 
-    
-    init_mobot(0.430,1.410,0,true);
-
+    /*des_psi = calculate_angle_correction(x_table2,2*y_table2/3);
+    init_mobot(x_table2,y_table2/4,des_psi,true);
     ROS_INFO("After table 1, step 2");
     ROS_INFO("Current state x=[%f],y=[%f]",current_state.pose.pose.position.x,current_state.pose.pose.position.y);
-    ROS_INFO("Current state heading=[%f]",current_state.pose.pose.orientation.z);
+    ROS_INFO("Current state heading=[%f]",current_state.pose.pose.orientation.z);*/
 
-    init_mobot(0.430,2.500,0,true);
+    /*des_psi = calculate_angle_correction(x_table2,3*y_table2/4);
+    init_mobot(x_table2,y_table2/4,des_psi,true);
     ROS_INFO("After table 1, step 3");
     ROS_INFO("Current state x=[%f],y=[%f]",current_state.pose.pose.position.x,current_state.pose.pose.position.y);
-    ROS_INFO("Current state heading=[%f]",current_state.pose.pose.orientation.z);
-    ROS_INFO("Should have reached table2");
-   // init_mobot(x_table2,y_table2,des_psi,true);
-    backUp();
-    ROS_INFO("Backup after tavle 2");
+    ROS_INFO("Current state heading=[%f]",current_state.pose.pose.orientation.z);*/
+
+
+    /*des_psi = calculate_angle_correction(x_table2,y_table2);
+    init_mobot(x_table2,y_table2/4,des_psi,true);
+    ROS_INFO("After table 1, step 4");
     ROS_INFO("Current state x=[%f],y=[%f]",current_state.pose.pose.position.x,current_state.pose.pose.position.y);
-    ROS_INFO("Current state heading=[%f]",current_state.pose.pose.orientation.z);
+    ROS_INFO("Current state heading=[%f]",current_state.pose.pose.orientation.z);*/
+
+
+
+    backUp(); 
 
    des_psi = calculate_angle_correction(x_home,y_home);
    ROS_INFO("Going home now");

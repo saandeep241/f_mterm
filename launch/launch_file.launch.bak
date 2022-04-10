@@ -2,6 +2,7 @@
 <node name="des_pub_state_service" pkg="des_pub_state_service" type="des_pub_state_service" />
 <node name="lidar_alarm" pkg="lidar_alarm" type="lidar_alarm" />
 <node name="modal_trajectory_controller" pkg="modal_trajectory_controller" type="modal_trajectory_controller" />
+<node name="odom_tf_demo" pkg="odom_tf" type="odom_tf_demo" />
 
 
 </launch>

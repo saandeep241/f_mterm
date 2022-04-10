@@ -15,8 +15,8 @@ double range_max_ = 0.0;            // will be 80.0
 bool laser_alarm_= false;
 
 
-const float width = 0.4;            // half the width of the rectangular box
-const float dist_detect = 1;     // distance to closer edge (there should be a min value for this)
+const float width = 0.2;            // half the width of the rectangular box
+const float dist_detect = 0.5;     // distance to closer edge (there should be a min value for this)
 
 std::vector<float> range_limit;
 
