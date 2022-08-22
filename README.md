@@ -33,12 +33,12 @@ rosrun modal_trajectory_controller lin_steering_with_odom
 
 rosrun navigation_coordinator navigation_coordinator
 
-##This provides the commands for the robot to move
+## This provides the commands for the robot to move
 
 
 
 
-##Video link: https://drive.google.com/file/d/1Pd4r6FjKtktNDxQsUK1rWak3BtJsIeSH/view?usp=sharing
+## Video link: https://drive.google.com/file/d/1Pd4r6FjKtktNDxQsUK1rWak3BtJsIeSH/view?usp=sharing
 
 
 
